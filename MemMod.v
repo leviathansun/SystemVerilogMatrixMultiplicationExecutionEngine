@@ -1,6 +1,6 @@
 module Mem (memBus, memAddr, memRW, memWrite, memDo);
 output [255:0] memBus;
-input [2:0] memAddr;
+input [7:0] memAddr;
 input [255:0] memWrite;
 input memRW, memDo;
 
