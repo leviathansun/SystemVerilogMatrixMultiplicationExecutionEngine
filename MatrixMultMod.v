@@ -7,7 +7,7 @@ module MatrixMultiplication (dataOut, dataInBus, clk, fleg, RW, enable);
     output [255:0] dataOut;
     output fleg;
     input [255:0] dataInBus;
-	input RW;
+	input RW, enable, clk;
     
     reg [255:0] dataOut;
     reg fleg;
@@ -29,32 +29,39 @@ module MatrixMultiplication (dataOut, dataInBus, clk, fleg, RW, enable);
         begin
             for(j=0;j<4;j=j+1)
             begin
-                matTatami[i][j] = 0;
+                out_matTatami[i][j] = 0;
             end
         end
-        // $display("%p", matTatami);
+        // $display("%p", out_matTatami);
     end
     
+	// at negedge so that a whole clock cycle isn't wasted
 	always @ (negedge clk)
 	begin
 		// when calculation is finished and flag needs to be brought up
-		if(enable == 1 && RW = 1 && mat1LowMat2High == 1 && fleg == 0)	
+		if(enable == 1 && RW == 1 && mat1LowMat2High == 1 && fleg == 0)	
 		begin
 			mat1LowMat2High = 0;
 			fleg = 1;
 		end
+		
+		else if (enable == 1 && RW == 0 && mat1LowMat2High == 0 && fleg == 0)
+		begin
+			fleg = 1;
+		end
 	end
+	
     always @ (posedge clk)
     begin
 	
 		// when first matrix needs to be loaded into the module
-		if(enable == 1 && RW = 1 && mat1LowMat2High == 0 && fleg == 0)	
+		if(enable == 1 && RW == 1 && mat1LowMat2High == 0 && fleg == 0)	
 		begin
 			for(i=0;i<4;i=i+1)
 			begin
 				for(j=0;j<4;j=j+1)
 				begin
-					matMerc[i][j] = dataInBus[i*64+16*j+:16];
+					in1_matMerc[i][j] = dataInBus[i*64+16*j+:16];
 				end
 			end
 			mat1LowMat2High = 1;
@@ -62,87 +69,43 @@ module MatrixMultiplication (dataOut, dataInBus, clk, fleg, RW, enable);
 		end
 		
 		// when the second matrix needs to be loaded into the module, and the calculation will then take place
-		else if (enable == 1 && RW = 1 && mat1LowMat2High == 1 && fleg == 1)
+		if (enable == 1 && RW == 1 && mat1LowMat2High == 1 && fleg == 1)
 		begin	
 			fleg = 0;
 			for(i=0;i<4;i=i+1)
-				begin
-					for(j=0;j<4;j=j+1)
-					begin
-						matCol[i][j] = dataInBus[i*64+16*j+:16];
-					end
-				end
-				for(i=0;i<4;i=i+1)
-				begin
-					for(j=0;j<4;j=j+1)
-					begin
-						for(k=0;k<4;k=k+1)
-						begin
-							matTatami[i][j] = matTatami[i][j] + (matMerc[i][k]*matCol[k][j]);
-						end
-					end
-				end
-				$display("%p", matTatami);
-				$displayh("%p", matTatami);
-				for(i = 0;i<4;i = i +1)
-				begin
-					for(j=0;j<4;j = j +1)
-						begin
-							regOut[i*64+16*j+:16] = matTatami[i][j];
-						end
-				end
-				dataOut = regOut;
-			end
-		end
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-			
-			else if (mat1LowMat2High == 1)
 			begin
-				for(i=0;i<4;i=i+1)
+				for(j=0;j<4;j=j+1)
 				begin
-					for(j=0;j<4;j=j+1)
+					in2_matCol[i][j] = dataInBus[i*64+16*j+:16];
+				end
+			end
+			for(i=0;i<4;i=i+1)
+			begin
+				for(j=0;j<4;j=j+1)
+				begin
+					for(k=0;k<4;k=k+1)
 					begin
-						matCol[i][j] = dataInBus[i*64+16*j+:16];
+						out_matTatami[i][j] = out_matTatami[i][j] + (in1_matMerc[i][k]*in2_matCol[k][j]);
 					end
 				end
-				for(i=0;i<4;i=i+1)
+			end
+			$display("%p", out_matTatami);
+			$displayh("%p", out_matTatami);
+			for(i = 0;i<4;i = i +1)
+			begin
+				for(j=0;j<4;j = j +1)
 				begin
-					for(j=0;j<4;j=j+1)
-					begin
-						for(k=0;k<4;k=k+1)
-						begin
-							matTatami[i][j] = matTatami[i][j] + (matMerc[i][k]*matCol[k][j]);
-						end
-					end
+					regOut[i*64+16*j+:16] = out_matTatami[i][j];
 				end
-				$display("%p", matTatami);
-				$displayh("%p", matTatami);
-				for(i = 0;i<4;i = i +1)
-				begin
-					for(j=0;j<4;j = j +1)
-						begin
-							regOut[i*64+16*j+:16] = matTatami[i][j];
-						end
-				end
-				dataOut = regOut;
-				mat1LowMat2High = 0;
-				fleg = 1;
 			end
 		end
-    end
+			
+		// when data needs to be output
+		if (enable == 1 && RW == 0 && mat1LowMat2High == 0 && fleg == 1)
+		begin			
+			dataOut = regOut;
+			fleg = 0;
+		end
+	end
     
 endmodule
