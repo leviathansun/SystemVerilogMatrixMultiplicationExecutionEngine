@@ -177,6 +177,8 @@ begin
                 multEN = 0;
                 multRW = 0;
             end
+			multEN = 1;
+			
 
             // $display("mul: code: %b reg?: %b out: %b reg?: %b addr1: %b reg?: %b addr2: %b",opCase,regMemOut,addrOut,regMem1,addr1,regMem2,addr2);
             end
@@ -294,3 +296,18 @@ task staaaph;
 endtask
 
 endmodule
+
+//dday of presentation things. One module that does them all is a single data in and out for the system
+
+
+// final notes
+// 1. define the logic gates for this diagram
+// 2. reduce it
+// 3. top down design 32bit something
+// 4. melee and moore machines
+// 5. test benches
+// 6. combinational logic
+// 7. state machine for _, it's a controller and controller is defined for you
+// 8. write psuedocode for implementing a things
+// 9. write something in verilog code
+// 10. 

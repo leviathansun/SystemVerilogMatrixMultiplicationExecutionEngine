@@ -5,7 +5,7 @@ reg RESET;
 
 // connections inside system
 wire  [255:0] toMemBus;
-wire [255:0] toMultBus;
+wire [255:0] toModuleBus;
 wire [255:0] toRegBus;
 wire [31:0] opWriteBus;
 wire multRW, tranRW, memRW, subRW, addRW, multFleg, tranFleg, memFleg, subFleg, addFleg;
@@ -43,7 +43,7 @@ Reg_Mem Reggie (fromRegBus, regFleg, regEN, regRW, toRegBus, clk);
 
 Mem Remembral (fromMemBus, memFleg, memAddr, memRW, memWrite, memEN, clk);
 
-MatrixMultiplication timesMe (fromMultBus, multFleg, toMultBus, clk, multRW, multEN, matDecide);
+MatrixMultiplication timesMe (fromMultBus, multFleg, toModuleBus, clk, multRW, multEN, matDecide);
 
 initial
 begin
@@ -57,8 +57,7 @@ end
 
 initial
 begin    
-    #11 RESET = 1;
-    
+    #11 RESET = 1; 
 end
 
 endmodule
