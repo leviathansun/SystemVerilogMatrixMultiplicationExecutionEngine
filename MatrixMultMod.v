@@ -3,7 +3,7 @@
     separate matices. Variable mat1LowMat2High keeps track of how many matrices have been recieved since last output
 */
 
-module MatrixMultiplication (dataOut, dataInBus, clk, fleg, RW, enable);
+module MatrixMultiplication (dataOut, fleg, dataInBus, clk, RW, enable);
     output [255:0] dataOut;
     output fleg;
     input [255:0] dataInBus;
@@ -39,15 +39,14 @@ module MatrixMultiplication (dataOut, dataInBus, clk, fleg, RW, enable);
 	always @ (negedge clk)
 	begin
 		// when calculation is finished and flag needs to be brought up
-		if(enable == 1 && RW == 1 && mat1LowMat2High == 1 && fleg == 0)	
+		if(enable == 1 && RW == 1 && mat1LowMat2High == 1)	
 		begin
 			mat1LowMat2High = 0;
-			fleg = 1;
 		end
 		
-		else if (enable == 1 && RW == 0 && mat1LowMat2High == 0 && fleg == 0)
+		if (fleg == 1)
 		begin
-			fleg = 1;
+			fleg = 0;
 		end
 	end
 	
@@ -71,7 +70,6 @@ module MatrixMultiplication (dataOut, dataInBus, clk, fleg, RW, enable);
 		// when the second matrix needs to be loaded into the module, and the calculation will then take place
 		if (enable == 1 && RW == 1 && mat1LowMat2High == 1 && fleg == 1)
 		begin	
-			fleg = 0;
 			for(i=0;i<4;i=i+1)
 			begin
 				for(j=0;j<4;j=j+1)
@@ -98,13 +96,14 @@ module MatrixMultiplication (dataOut, dataInBus, clk, fleg, RW, enable);
 					regOut[i*64+16*j+:16] = out_matTatami[i][j];
 				end
 			end
+            fleg = 1;
 		end
 			
 		// when data needs to be output
 		if (enable == 1 && RW == 0 && mat1LowMat2High == 0 && fleg == 1)
 		begin			
 			dataOut = regOut;
-			fleg = 0;
+			fleg = 1;
 		end
 	end
     

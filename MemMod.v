@@ -1,27 +1,47 @@
-module Mem (memBus, memAddr, memRW, memWrite, memDo);
+module Mem (memBus, memFleg, memAddr, memRW, memWrite, memEN, clk);
 output [255:0] memBus;
+output reg memFleg;
 input [7:0] memAddr;
 input [255:0] memWrite;
-input memRW, memDo;
+input memRW, memEN, clk;
 
 reg [255:0] memBus;
 // memory itself
 reg [255:0] memArray[7:0];
 
-always @ (posedge memDo)
+initial
+begin
+    memFleg = 0;
+    $readmemh("mem.mem", memArray);
+end
+
+always @ (negedge clk)
+begin
+    if (memFleg == 1)
+    begin
+        memFleg = 0;
+    end
+end
+
+always @ (posedge clk)
 // if rw is 1, read from new address, if rw is 0, write to new address
 begin
-	if (memRW == 1)  
+    if (memEN == 1)
 	begin
-		memBus = memArray[memAddr];
-	end
-	else
-	begin
-        if (memRW == 0)
+        if (memRW == 1)  
         begin
-            memArray[memAddr] = memWrite;
-			$display("memArray[%bb]: %hh", memAddr, memArray[memAddr]);
+            memBus = memArray[memAddr];
+            memFleg = 1;
         end
+        else
+        begin
+            if (memRW == 0)
+            begin
+                memArray[memAddr] = memWrite;
+                $display("memArray[%bb]: %hh", memAddr, memArray[memAddr]);
+            end
+        end
+        memFleg = 1;
     end
 end
 endmodule
