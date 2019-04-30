@@ -1,17 +1,19 @@
 module ExecEngine (toMemBus, toModuleBus, toRegBus, toOpBus,
-multRW, tranRW, addRW, memRW, regRW, opRW,
+multRW, tranRW, addRW, memRW, regRW, opRW, matDecide,
 multEN, tranEN, addEN, memEN, regEN, opEN, add1sub0,
 memAddr, opCounter, 
-fromMemBus, fromRegBus, fromModBus,  fromOpBus,
+fromMemBus, fromRegBus, fromMultBus,  fromASBus, fromTranBus, fromOpBus,
 multFleg, tranFleg, memFleg, subFleg, addFleg, memFleg, regFleg, opFleg, clk, RESET);
 
 // system wide connections
 output reg [255:0] toModuleBus;
-input [255:0] fromModBus;
+output reg matDecide;
+input [255:0] fromMultBus;
 input clk;
 input RESET;
 reg [255:0] matrix1;
 reg [255:0] matrix2;
+reg [255:0] matrixOUT;
 
 // stop variables
 parameter STAAAHP = 4'b0000;
@@ -19,12 +21,14 @@ parameter STAAAHP = 4'b0000;
 // multiply/scale module variables, inmput wires, and output registers
 parameter SCA = 4'b0100;
 parameter MUL = 4'b0011;
+input [255:0] fromASBus;
 output reg multRW, multEN;
 input multFleg;
 reg [255:0] matrixScalar;
 
 // transpose module variables, wires, and registers
 parameter TRA = 4'b0101;
+input [255:0] fromTranBus;
 output reg tranRW, tranEN;
 input tranFleg;
 
@@ -58,7 +62,7 @@ reg [1:0] regMemOut;
 reg [7:0] addrOut;
 reg [7:0] addr1;
 reg [7:0] addr2;
-reg opWrite;
+reg opWrite, mapDecide;
 reg runExecutions;
 
 reg opRead; // runs entire script, grabbing next op
@@ -154,7 +158,25 @@ begin
             regMem2 = opOp >> 31;
             opOp = opOp << 1;
             addr2 = opOp >> 24;
+            matDecide = 0;
+            multRW = 1;
             memToEgg(regMem1, addr1);
+            toModuleBus = matrix1;
+            multEN = 1;
+            @ (posedge multFleg) multEN = 0;
+            matDecide = 1;
+            memToEgg(regMem2, addr2);
+            toModuleBus = matrix2;
+            multEN= 1;
+            @ (posedge multFleg) multEN = 0;
+            multRW = 0;
+            multEN = 1;
+            @ (posedge multFleg) 
+            begin
+                matrixOUT = fromMultBus; 
+                multEN = 0;
+                multRW = 0;
+            end
 
             // $display("mul: code: %b reg?: %b out: %b reg?: %b addr1: %b reg?: %b addr2: %b",opCase,regMemOut,addrOut,regMem1,addr1,regMem2,addr2);
             end
@@ -212,15 +234,17 @@ task memToEgg;
             memRW = 1;
             memEN = 1;
             @ (posedge memFleg) memEN = 0;
-            matrix1
+            if(matDecide == 0) matrix1 = fromMemBus;
+            if(matDecide == 1) matrix2 = fromMemBus;
         end
         else if (regMem == 1)
         begin
             regRW = 1;
             regEN = 1;
             @ (posedge regFleg) regEN = 0;
+            if(matDecide == 0) matrix1 = fromMemBus;
+            if(matDecide == 1) matrix2 = fromMemBus;
         end
-         
     end
 endtask
 
@@ -240,7 +264,13 @@ endtask
     
 task eggToDisplay;
     begin
-    
+       // for(i = 0;i<4;i = i +1)
+        // begin
+            // for(j=0;j<4;j = j +1)
+            // begin
+                // temp_matrix[i][j] = matrix[i*64+16*j+:16];
+            // end
+        // end
     end 
 endtask
         

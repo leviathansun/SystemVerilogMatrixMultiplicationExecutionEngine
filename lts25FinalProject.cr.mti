@@ -35,6 +35,13 @@ Model Technology ModelSim PE Student Edition vlog 10.4a Compiler 2015.03 Apr  7 
 Top level modules:
 	MatrixMultiplication
 
+} {} {}} {E:/Modeltech_pe_edu_10.4a/Class_Projects/Final project/SystemVerilog/ExecEngine.v} {1 {vlog -work work -stats=none {E:/Modeltech_pe_edu_10.4a/Class_Projects/Final project/SystemVerilog/ExecEngine.v}
+Model Technology ModelSim PE Student Edition vlog 10.4a Compiler 2015.03 Apr  7 2015
+-- Compiling module ExecEngine
+
+Top level modules:
+	ExecEngine
+
 } {} {}} {E:/Modeltech_pe_edu_10.4a/Class_Projects/Final project/SystemVerilog/MemMod.v} {1 {vlog -work work -stats=none {E:/Modeltech_pe_edu_10.4a/Class_Projects/Final project/SystemVerilog/MemMod.v}
 Model Technology ModelSim PE Student Edition vlog 10.4a Compiler 2015.03 Apr  7 2015
 -- Compiling module Mem

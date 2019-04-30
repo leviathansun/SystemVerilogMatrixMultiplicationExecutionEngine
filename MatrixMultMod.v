@@ -1,13 +1,13 @@
 /*
     Matrix multiplication module multiplies two matrices and outputs the result once it recieves two 
-    separate matices. Variable mat1LowMat2High keeps track of how many matrices have been recieved since last output
+    separate matices. Variable matDecide handles which mat to use
 */
 
-module MatrixMultiplication (dataOut, fleg, dataInBus, clk, RW, enable);
+module MatrixMultiplication (dataOut, fleg, dataInBus, clk, RW, enable, matDecide);
     output [255:0] dataOut;
     output fleg;
     input [255:0] dataInBus;
-	input RW, enable, clk;
+	input RW, enable, clk, matDecide;
     
     reg [255:0] dataOut;
     reg fleg;
@@ -19,11 +19,9 @@ module MatrixMultiplication (dataOut, fleg, dataInBus, clk, RW, enable);
     reg [3:0] i;
     reg [3:0] j;
     reg [3:0] k;
-    reg mat1LowMat2High;
     
     initial
     begin
-        mat1LowMat2High = 0;
         fleg = 0;
         for(i=0;i<4;i=i+1)
         begin
@@ -38,12 +36,7 @@ module MatrixMultiplication (dataOut, fleg, dataInBus, clk, RW, enable);
 	// at negedge so that a whole clock cycle isn't wasted
 	always @ (negedge clk)
 	begin
-		// when calculation is finished and flag needs to be brought up
-		if(enable == 1 && RW == 1 && mat1LowMat2High == 1)	
-		begin
-			mat1LowMat2High = 0;
-		end
-		
+		// when calculation is finished and flag needs to be brought down
 		if (fleg == 1)
 		begin
 			fleg = 0;
@@ -54,7 +47,7 @@ module MatrixMultiplication (dataOut, fleg, dataInBus, clk, RW, enable);
     begin
 	
 		// when first matrix needs to be loaded into the module
-		if(enable == 1 && RW == 1 && mat1LowMat2High == 0 && fleg == 0)	
+		if(enable == 1 && RW == 1 && matDecide == 0)	
 		begin
 			for(i=0;i<4;i=i+1)
 			begin
@@ -63,12 +56,11 @@ module MatrixMultiplication (dataOut, fleg, dataInBus, clk, RW, enable);
 					in1_matMerc[i][j] = dataInBus[i*64+16*j+:16];
 				end
 			end
-			mat1LowMat2High = 1;
 			fleg = 1;
 		end
 		
 		// when the second matrix needs to be loaded into the module, and the calculation will then take place
-		if (enable == 1 && RW == 1 && mat1LowMat2High == 1 && fleg == 1)
+		if (enable == 1 && RW == 1 && matDecide == 1)
 		begin	
 			for(i=0;i<4;i=i+1)
 			begin
@@ -100,7 +92,7 @@ module MatrixMultiplication (dataOut, fleg, dataInBus, clk, RW, enable);
 		end
 			
 		// when data needs to be output
-		if (enable == 1 && RW == 0 && mat1LowMat2High == 0 && fleg == 1)
+		if (enable == 1 && RW == 0)
 		begin			
 			dataOut = regOut;
 			fleg = 1;
