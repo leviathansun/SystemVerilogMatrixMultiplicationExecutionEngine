@@ -3,13 +3,13 @@
     separate matices. Variable matDecide handles which mat to use
 */
 
-module MatrixMultiplication (dataOut, fleg, dataInBus, clk, RW, enable, matDecide);
-    output [255:0] dataOut;
+module MatrixMultiplication (fromMultBus, fleg, dataInBus, clk, RW, enable, matDecide);
+    output [255:0] fromMultBus;
     output fleg;
     input [255:0] dataInBus;
 	input RW, enable, clk, matDecide;
     
-    reg [255:0] dataOut;
+    reg [255:0] fromMultBus;
     reg fleg;
     
     reg [255:0] regOut;
@@ -49,6 +49,13 @@ module MatrixMultiplication (dataOut, fleg, dataInBus, clk, RW, enable, matDecid
 		// when first matrix needs to be loaded into the module
 		if(enable == 1 && RW == 1 && matDecide == 0)	
 		begin
+            for(i=0;i<4;i=i+1)
+            begin
+                for(j=0;j<4;j=j+1)
+                begin
+                    out_matTatami[i][j] = 0;
+                end
+            end
 			for(i=0;i<4;i=i+1)
 			begin
 				for(j=0;j<4;j=j+1)
@@ -94,7 +101,7 @@ module MatrixMultiplication (dataOut, fleg, dataInBus, clk, RW, enable, matDecid
 		// when data needs to be output
 		if (enable == 1 && RW == 0)
 		begin			
-			dataOut = regOut;
+			fromMultBus = regOut;
 			fleg = 1;
 		end
 	end

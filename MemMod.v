@@ -1,8 +1,8 @@
-module Mem (memBus, memFleg, memAddr, memRW, memWrite, memEN, clk);
+module Mem (memBus, memFleg, memAddr, memRW, toMemBus, memEN, clk);
 output [255:0] memBus;
 output reg memFleg;
 input [7:0] memAddr;
-input [255:0] memWrite;
+input [255:0] toMemBus;
 input memRW, memEN, clk;
 
 reg [255:0] memBus;
@@ -37,7 +37,7 @@ begin
         begin
             if (memRW == 0)
             begin
-                memArray[memAddr] = memWrite;
+                memArray[memAddr] = toMemBus;
                 $display("memArray[%bb]: %hh", memAddr, memArray[memAddr]);
             end
         end

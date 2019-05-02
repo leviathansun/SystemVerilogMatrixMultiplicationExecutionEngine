@@ -35,6 +35,7 @@ begin
                 $display("regMem = %hh", regMem);
             end
         end
+        regFleg = 1;
     end
 end
 endmodule

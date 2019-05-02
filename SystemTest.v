@@ -17,7 +17,6 @@ wire [255:0] fromTranBus;
 wire [31:0] fromOpBus;
 wire [7:0] memAddr;
 wire [3:0] opCounter;
-wire [255:0] memWrite;
 wire multEN, tranEN, addEN, memEN, regEN, opEN, add1sub0, matDecide;
 
 // test internal registers
@@ -41,7 +40,7 @@ Op_Mem OperationTheGame (fromOpBus, opFleg, opCounter, opRW, opEN, opWriteBus, c
 
 Reg_Mem Reggie (fromRegBus, regFleg, regEN, regRW, toRegBus, clk);
 
-Mem Remembral (fromMemBus, memFleg, memAddr, memRW, memWrite, memEN, clk);
+Mem Remembral (fromMemBus, memFleg, memAddr, memRW, toMemBus, memEN, clk);
 
 MatrixMultiplication timesMe (fromMultBus, multFleg, toModuleBus, clk, multRW, multEN, matDecide);
 
@@ -52,7 +51,7 @@ end
 
 always
 begin
-    #10 clk = ~clk;
+    #1 clk = ~clk;
 end
 
 initial
