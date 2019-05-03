@@ -3,7 +3,7 @@ multRW, tranRW, addRW, memRW, regRW, opRW, matDecide,
 multEN, tranEN, addEN, memEN, regEN, opEN, add1sub0,
 memAddr, opCounter, 
 fromMemBus, fromRegBus, fromMultBus, fromASBus, fromTranBus, fromOpBus,
-multFleg, tranFleg, memFleg, subFleg, addFleg, memFleg, regFleg, opFleg, clk, RESET);
+multFleg, tranFleg, memFleg, addFleg, memFleg, regFleg, opFleg, clk, RESET);
 
 // system wide connections
 output reg [255:0] toModuleBus;
@@ -14,6 +14,7 @@ input RESET;
 reg [255:0] matrix1;
 reg [255:0] matrix2;
 reg [255:0] matrixOUT;
+reg [16:0] displayMatrix[3:0][3:0];
 
 // stop variables
 parameter STAAAHP = 4'b0000;
@@ -48,7 +49,6 @@ parameter SUM = 4'b0001;
 parameter SUB = 4'b0010;
 output reg add1sub0, addRW, addEN;
 input addFleg;
-input subFleg;
 
 // opCode decode variables, input wires, and output registers
 output reg [3:0] opCounter;
@@ -149,7 +149,55 @@ begin
             regMem2 = opOp >> 31;
             opOp = opOp << 1;
             addr2 = opOp >> 24;
+            matDecide = 0;
+            addRW = 1;
             memToEgg(regMem1, addr1);
+            toModuleBus = matrix1;
+            addEN = 1;
+            @ (posedge addFleg) addEN = 0;
+            matDecide = 1;
+            add1sub0 = 1;
+            memToEgg(regMem2, addr2);
+            toModuleBus = matrix2;
+            addEN= 1;
+            @ (posedge addFleg) addEN = 0;
+            addRW = 0;
+            addEN = 1;
+            @ (posedge addFleg) 
+            begin
+                matrixOUT = fromASBus; 
+                addEN = 0;
+                addRW = 0;
+            end
+			addEN = 1;
+            toRegBus = matrixOUT;
+            if(regMemOut == 2'b11) // if goes to register and memory
+            begin
+                regRW = 0;
+                memRW = 0;
+                toRegBus = matrixOUT;
+                regEN = 1;
+                @ (posedge regFleg) regEN = 0;
+                memAddr = addrOut;
+                toMemBus = matrixOUT;
+                memEN = 1;
+                @ (posedge memFleg) memEN = 0;
+            end
+            if(regMemOut == 2'b10) // if goes to register and memory
+            begin
+                regRW = 0;
+                toRegBus = matrixOUT;
+                regEN = 1;
+                @ (posedge regFleg) regEN = 0;
+            end
+            if(regMemOut == 2'b01) // if goes to register and memory
+            begin
+                memRW = 0;
+                memAddr = addrOut;
+                toMemBus = matrixOUT;
+                memEN = 1;
+                @ (posedge memFleg) memEN = 0;
+            end
 
             // $display("sum code: %b reg?: %b out: %b reg?: %b addr1: %b reg?: %b addr2: %b",opCase,regMemOut,addrOut,regMem1,addr1,regMem2,addr2);
             end
@@ -162,7 +210,55 @@ begin
             regMem2 = opOp >> 31;
             opOp = opOp << 1;
             addr2 = opOp >> 24;
+            matDecide = 0;
+            addRW = 1;
             memToEgg(regMem1, addr1);
+            toModuleBus = matrix1;
+            addEN = 1;
+            @ (posedge addFleg) addEN = 0;
+            matDecide = 1;
+            add1sub0 = 0;
+            memToEgg(regMem2, addr2);
+            toModuleBus = matrix2;
+            addEN= 1;
+            @ (posedge addFleg) addEN = 0;
+            addRW = 0;
+            addEN = 1;
+            @ (posedge addFleg) 
+            begin
+                matrixOUT = fromASBus; 
+                addEN = 0;
+                addRW = 0;
+            end
+			addEN = 1;
+            toRegBus = matrixOUT;
+            if(regMemOut == 2'b11) // if goes to register and memory
+            begin
+                regRW = 0;
+                memRW = 0;
+                toRegBus = matrixOUT;
+                regEN = 1;
+                @ (posedge regFleg) regEN = 0;
+                memAddr = addrOut;
+                toMemBus = matrixOUT;
+                memEN = 1;
+                @ (posedge memFleg) memEN = 0;
+            end
+            if(regMemOut == 2'b10) // if goes to register and memory
+            begin
+                regRW = 0;
+                toRegBus = matrixOUT;
+                regEN = 1;
+                @ (posedge regFleg) regEN = 0;
+            end
+            if(regMemOut == 2'b01) // if goes to register and memory
+            begin
+                memRW = 0;
+                memAddr = addrOut;
+                toMemBus = matrixOUT;
+                memEN = 1;
+                @ (posedge memFleg) memEN = 0;
+            end
 
             // $display("sub: code: %b reg?: %b out: %b reg?: %b addr1: %b reg?: %b addr2: %b",opCase,regMemOut,addrOut,regMem1,addr1,regMem2,addr2);
             end
@@ -229,7 +325,7 @@ begin
             end
         SCA:	
             begin	// for scalar multiplication instruction, scalar is an 8 bit int, src addresses not used
-                        regMem1 = opOp >> 31;
+            regMem1 = opOp >> 31;
             opOp = opOp << 1;
             addr1 = opOp >> 24;
             opOp = opOp << 8;
@@ -295,7 +391,49 @@ begin
             regMem2 = opOp >> 31;
             opOp = opOp << 1;
             addr2 = opOp >> 24;
+            matDecide = 0;
+            tranRW = 1;
             memToEgg(regMem1, addr1);
+            toModuleBus = matrix1;
+            tranEN = 1;
+            @ (posedge tranFleg) tranEN = 0;
+            tranRW = 0;
+            tranEN = 1;
+            @ (posedge tranFleg) 
+            begin
+                matrixOUT = fromTranBus; 
+                tranEN = 0;
+                tranRW = 0;
+            end
+			tranEN = 1;
+            toModuleBus = matrixOUT;
+            if(regMemOut == 2'b11) // if goes to register and memory
+            begin
+                regRW = 0;
+                memRW = 0;
+                toRegBus = matrixOUT;
+                regEN = 1;
+                @ (posedge regFleg) regEN = 0;
+                memAddr = addrOut;
+                toMemBus = matrixOUT;
+                memEN = 1;
+                @ (posedge memFleg) memEN = 0;
+            end
+            if(regMemOut == 2'b10) // if goes to register and memory
+            begin
+                regRW = 0;
+                toRegBus = matrixOUT;
+                regEN = 1;
+                @ (posedge regFleg) regEN = 0;
+            end
+            if(regMemOut == 2'b01) // if goes to register and memory
+            begin
+                memRW = 0;
+                memAddr = addrOut;
+                toMemBus = matrixOUT;
+                memEN = 1;
+                @ (posedge memFleg) memEN = 0;
+            end
 
             // $display("tra: code: %b reg?: %b out: %b reg?: %b addr1: %b reg?: %b addr2: %b",opCase,regMemOut,addrOut,regMem1,addr1,regMem2,addr2);
             end
@@ -305,10 +443,7 @@ begin
             addr2 = 3'b000;
             regMem1 = 0;
             regMem2 = 0;
-            staaaph();
-            modToEgg();
-            eggToMem();
-            eggToDisplay();
+            eggToDisplay(toMemBus);
             staaaph();
             $display("Oh, hi Mark.");
             // #4 $stop;
@@ -342,30 +477,19 @@ task memToEgg;
         end
     end
 endtask
-
-task modToEgg;
-    begin
-    
-    end    
-endtask
-
-task eggToMem;
-    begin
-       
-       opCounter = opCounter + 1;
-       opRead = 1;
-    end       
-endtask
     
 task eggToDisplay;
+    input [255:0] matrixD;
+    integer i;
     begin
-       // for(i = 0;i<4;i = i +1)
-        // begin
-            // for(j=0;j<4;j = j +1)
-            // begin
-                // temp_matrix[i][j] = matrix[i*64+16*j+:16];
-            // end
-        // end
+       for(i = 0;i<4;i = i +1)
+        begin
+            for(j=0;j<4;j = j +1)
+            begin
+                displayMatrix[i][j] = matrixD[i*64+16*j+:16];
+            end
+        end
+        $displayh(displayMatrix);
     end 
 endtask
         

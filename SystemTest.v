@@ -34,7 +34,7 @@ multEN, tranEN, addEN, memEN, regEN, opEN, add1sub0,
 memAddr, opCounter, 
 
 fromMemBus, fromRegBus, fromMultBus, fromASBus, fromTranBus,  fromOpBus,
-multFleg, tranFleg, memFleg, subFleg, addFleg, memFleg, regFleg, opFleg, clk, RESET);
+multFleg, tranFleg, memFleg, addFleg, memFleg, regFleg, opFleg, clk, RESET);
 //
 Op_Mem OperationTheGame (fromOpBus, opFleg, opCounter, opRW, opEN, opWriteBus, clk);
 
@@ -43,6 +43,10 @@ Reg_Mem Reggie (fromRegBus, regFleg, regEN, regRW, toRegBus, clk);
 Mem Remembral (fromMemBus, memFleg, memAddr, memRW, toMemBus, memEN, clk);
 
 MatrixMultiplication timesMe (fromMultBus, multFleg, toModuleBus, clk, multRW, multEN, matDecide);
+
+TranslationModule TransMog (fromTranBus, tranFleg, toModuleBus, clk, tranRW, tranEN, matDecide);
+
+AddSubModule addSubMod (fromASBus, addFleg, toModuleBus, clk, addRW, addEN, matDecide, add1sub0);
 
 initial
 begin
