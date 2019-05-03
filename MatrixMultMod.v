@@ -30,7 +30,6 @@ module MatrixMultiplication (fromMultBus, fleg, dataInBus, clk, RW, enable, matD
                 out_matTatami[i][j] = 0;
             end
         end
-        // $display("%p", out_matTatami);
     end
     
 	// at negedge so that a whole clock cycle isn't wasted

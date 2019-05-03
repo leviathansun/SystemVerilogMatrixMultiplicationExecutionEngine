@@ -69,13 +69,7 @@ reg runExecutions;
 
 reg opRead; // runs entire script, grabbing next op
 
-
-// Op_Mem OperationTheGame (opBus, opFleg, opCounter, opRW, toOpBus, clk);
-// Reg_Mem Reggie (regBus, regFleg, regDo, regRW, regWrite, clk);
-// Mem Remembral (memBus, memFleg, memAddr, memRW, memWrite, memDo, clk);
-// MatrixMultiplication timesMe (dataOut, fleg, dataInBus, clk, RW, enable);
-
-initial
+initial // set enables to zero at initial
 begin
     opRead = 0;
     opEN = 0;
@@ -91,7 +85,7 @@ begin
     end
 end
 
-always @ (posedge clk)
+always @ (posedge clk) // reset buses when new operation is needed
 begin
     if (runExecutions == 1)
     begin
@@ -198,8 +192,6 @@ begin
                 memEN = 1;
                 @ (posedge memFleg) memEN = 0;
             end
-
-            // $display("sum code: %b reg?: %b out: %b reg?: %b addr1: %b reg?: %b addr2: %b",opCase,regMemOut,addrOut,regMem1,addr1,regMem2,addr2);
             end
         SUB:	
             begin	// for subtraction instruction
@@ -434,8 +426,6 @@ begin
                 memEN = 1;
                 @ (posedge memFleg) memEN = 0;
             end
-
-            // $display("tra: code: %b reg?: %b out: %b reg?: %b addr1: %b reg?: %b addr2: %b",opCase,regMemOut,addrOut,regMem1,addr1,regMem2,addr2);
             end
         STAAAHP:	
             begin	// for staaahp instruction. Ends Simulation.
@@ -446,7 +436,6 @@ begin
             eggToDisplay(toMemBus);
             staaaph();
             $display("Oh, hi Mark.");
-            // #4 $stop;
             end
         default: $display ("Error in opcodes"); 
     endcase
@@ -454,7 +443,7 @@ begin
     opRead = 1;
 end
     
-task memToEgg;
+task memToEgg; // take data from memory to execution unit
     input regMem;
     input [7:0] addr;
     begin
@@ -478,7 +467,7 @@ task memToEgg;
     end
 endtask
     
-task eggToDisplay;
+task eggToDisplay; // display a given matrix
     input [255:0] matrixD;
     integer i;
     begin
@@ -493,7 +482,7 @@ task eggToDisplay;
     end 
 endtask
         
-task scalyMatrix;
+task scalyMatrix; //create identity matrix for scalar
     input [7:0] scalar;
     integer i;
     begin
@@ -513,18 +502,3 @@ task staaaph;
 endtask
 
 endmodule
-
-//dday of presentation things. One module that does them all is a single data in and out for the system
-
-
-// final notes
-// 1. define the logic gates for this diagram
-// 2. reduce it
-// 3. top down design 32bit something
-// 4. melee and moore machines
-// 5. test benches
-// 6. combinational logic
-// 7. state machine for _, it's a controller and controller is defined for you
-// 8. write psuedocode for implementing a things
-// 9. write something in verilog code
-// 10. 

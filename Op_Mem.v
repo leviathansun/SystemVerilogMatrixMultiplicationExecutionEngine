@@ -37,7 +37,6 @@ always @ (posedge clk)
             else if (opRW == 0)
             begin
                 opMemArray[opCount] = opWriteBus;
-                // $display("opMemArray[%bb]: %hh", wCount, opMemArray[wCount]);
                 
                 opFleg = 1;
             end

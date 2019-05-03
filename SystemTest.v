@@ -19,15 +19,6 @@ wire [7:0] memAddr;
 wire [3:0] opCounter;
 wire multEN, tranEN, addEN, memEN, regEN, opEN, add1sub0, matDecide;
 
-// test internal registers
-reg [16:0] matrix1[3:0][3:0];
-reg [16:0] matrix2[3:0][3:0];
-reg [255:0] matToMem1;
-reg [255:0] matToMem2;
-reg [31:0] opcode;
-integer i;
-integer j;
-//
 ExecEngine exeggutor (toMemBus, toModuleBus, toRegBus, opWriteBus,
 multRW, tranRW, addRW, memRW, regRW, opRW, matDecide,
 multEN, tranEN, addEN, memEN, regEN, opEN, add1sub0,

@@ -25,7 +25,6 @@ module AddSubModule (fromASBus, fleg, dataInBus, clk, RW, enable, matDecide, add
                 out_matTatami[i][j] = 0;
             end
         end
-        // $display("%p", out_matTatami);
     end
     
 	// at negedge so that a whole clock cycle isn't wasted
@@ -91,8 +90,6 @@ module AddSubModule (fromASBus, fleg, dataInBus, clk, RW, enable, matDecide, add
                     end
                 end
             end
-			// $display("%p", out_matTatami);
-			// $displayh("%p", out_matTatami);
 			for(i = 0;i<4;i = i +1)
 			begin
 				for(j=0;j<4;j = j +1)
