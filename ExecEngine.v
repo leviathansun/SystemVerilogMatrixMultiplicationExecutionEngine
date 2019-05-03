@@ -133,7 +133,7 @@ begin
     opOp = opOp << 2;
     addrOut = opOp >> 24;
     opOp = opOp << 8;
-    case(opCase)
+    case(opCase) // basic explination of module control, 1. put info and control on busses 2. EN = 1 3. on flag, EN = 0 4. back to one for next step 5. if no next step, get new opcode and reset busses
         SUM:	
             begin	// for sumation instruction 
             regMem1 = opOp >> 31;
@@ -145,13 +145,13 @@ begin
             addr2 = opOp >> 24;
             matDecide = 0;
             addRW = 1;
-            memToEgg(regMem1, addr1);
+            memToEgg(regMem1, addr1); // calls task to retrieve specified matrix from memory module
             toModuleBus = matrix1;
             addEN = 1;
             @ (posedge addFleg) addEN = 0;
             matDecide = 1;
             add1sub0 = 1;
-            memToEgg(regMem2, addr2);
+            memToEgg(regMem2, addr2); // calls task to retrieve specified matrix from memory module
             toModuleBus = matrix2;
             addEN= 1;
             @ (posedge addFleg) addEN = 0;
@@ -204,13 +204,13 @@ begin
             addr2 = opOp >> 24;
             matDecide = 0;
             addRW = 1;
-            memToEgg(regMem1, addr1);
+            memToEgg(regMem1, addr1); // calls task to retrieve specified matrix from memory module
             toModuleBus = matrix1;
             addEN = 1;
             @ (posedge addFleg) addEN = 0;
             matDecide = 1;
             add1sub0 = 0;
-            memToEgg(regMem2, addr2);
+            memToEgg(regMem2, addr2); // calls task to retrieve specified matrix from memory module
             toModuleBus = matrix2;
             addEN= 1;
             @ (posedge addFleg) addEN = 0;
@@ -265,12 +265,12 @@ begin
             addr2 = opOp >> 24;
             matDecide = 0;
             multRW = 1;
-            memToEgg(regMem1, addr1);
+            memToEgg(regMem1, addr1); // calls task to retrieve specified matrix from memory module
             toModuleBus = matrix1;
             multEN = 1;
             @ (posedge multFleg) multEN = 0;
             matDecide = 1;
-            memToEgg(regMem2, addr2);
+            memToEgg(regMem2, addr2); // calls task to retrieve specified matrix from memory module
             toModuleBus = matrix2;
             multEN= 1;
             @ (posedge multFleg) multEN = 0;
@@ -326,7 +326,7 @@ begin
             addr2 = opOp >> 24;
             matDecide = 0;
             multRW = 1;
-            memToEgg(regMem1, addr1);
+            memToEgg(regMem1, addr1); // calls task to retrieve specified matrix from memory module
             toModuleBus = matrix1;
             multEN = 1;
             @ (posedge multFleg) multEN = 0;
@@ -385,7 +385,7 @@ begin
             addr2 = opOp >> 24;
             matDecide = 0;
             tranRW = 1;
-            memToEgg(regMem1, addr1);
+            memToEgg(regMem1, addr1); // calls task to retrieve specified matrix from memory module
             toModuleBus = matrix1;
             tranEN = 1;
             @ (posedge tranFleg) tranEN = 0;
@@ -461,8 +461,8 @@ task memToEgg; // take data from memory to execution unit
             regRW = 1;
             regEN = 1;
             @ (posedge regFleg) regEN = 0;
-            if(matDecide == 0) matrix1 = fromMemBus;
-            if(matDecide == 1) matrix2 = fromMemBus;
+            if(matDecide == 0) matrix1 = fromRegBus;
+            if(matDecide == 1) matrix2 = fromRegBus;
         end
     end
 endtask
